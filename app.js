@@ -114,6 +114,37 @@ function toggleTopic(ci,ti){
   studyAction(XP_PER_TOPIC); openTopicStudy(ci,ti);
 }
 
+const examWeights={"Razonamiento Verbal":14,"Razonamiento Matemático":14,"Biología":10,"Álgebra":9,"Química":9,"Física":8,"Historia":7,"Geografía":7,"Aritmética":6,"Economía":6,"Geometría":5,"Trigonometría":5};
+const scheduleEmojis={"Razonamiento Verbal":"🧠","Razonamiento Matemático":"🔢","Biología":"🧬","Álgebra":"📐","Química":"⚗️","Física":"⚛️","Historia":"🏛️","Geografía":"🌎","Aritmética":"➗","Economía":"📈","Geometría":"📏","Trigonometría":"📊"};
+const scheduleBlocks=[
+ ["04:00","05:50","Razonamiento Verbal",14],
+ ["05:50","07:40","Razonamiento Matemático",14],
+ ["07:40","09:10","Biología",10],
+ ["09:10","10:35","Álgebra",9],
+ ["10:35","12:00","Química",9],
+ ["12:00","13:15","Física",8],
+ ["13:15","14:20","Historia",7],
+ ["14:20","15:25","Geografía",7],
+ ["15:25","16:20","Aritmética",6],
+ ["16:20","17:15","Economía",6],
+ ["17:15","18:00","Geometría",5],
+ ["18:00","18:45","Trigonometría",5],
+ ["18:45","19:30","Repaso / simulacro mixto",0]
+];
+function renderSchedulePreview(){
+ const el=document.querySelector("#schedulePreview"); if(!el)return;
+ el.innerHTML=scheduleBlocks.slice(0,4).map(b=>"<div class='schedule-mini'><span>"+b[0]+"–"+b[1]+"</span><strong>"+(scheduleEmojis[b[2]]||"🎯")+" "+escapeHtml(b[2])+"</strong><small>"+(b[3]?b[3]+" preguntas":"cierre")+"</small></div>").join("");
+}
+function openSchedule(){
+ const td=document.querySelector("#toolDialog"),tc=document.querySelector("#toolContent");
+ tc.innerHTML="<h3>🗓️ Horario diario UNALM</h3><p class='dialog-sub'>04:00 a. m. → 07:30 p. m. · 100 preguntas · mayor peso = mayor tiempo.</p><div class='schedule-full'>"+
+ scheduleBlocks.map(b=>"<div class='schedule-row "+(b[3]===0?"schedule-review":"")+"'><div class='schedule-time'>"+b[0]+"<br><span>"+b[1]+"</span></div><div class='schedule-main'><strong>"+(scheduleEmojis[b[2]]||"🎯")+" "+escapeHtml(b[2])+"</strong><small>"+(b[3]?b[3]+" preguntas · peso "+b[3]+"%":"Repaso, errores y mini simulacro de las materias del día")+"</small></div></div>").join("")+
+ "</div><div class='schedule-note'><strong>📌 Cómo usarlo</strong><span>En cada bloque: teoría → ejercicios → preguntas tipo examen. En el bloque final: repasa errores y mezcla cursos.</span></div>";
+ td.showModal();
+}
+document.querySelector("#openSchedule").onclick=openSchedule;
+renderSchedulePreview();
+
 const cd=document.querySelector("#courseDialog");document.querySelector("#addCourse").onclick=()=>cd.showModal();document.querySelector("#courseForm").onsubmit=e=>{e.preventDefault();const n=document.querySelector("#courseName").value.trim();if(n){courses.push({name:n,emoji:"📚",done:false,topics:[{name:"Tema 1",done:false},{name:"Tema 2",done:false},{name:"Tema 3",done:false},{name:"Tema 4",done:false}]});save();cd.close();document.querySelector("#courseName").value=""}};document.querySelector("#closeStudy").onclick=()=>studyDialog.close();
 
 let timerId=null,timerEnd=0;
