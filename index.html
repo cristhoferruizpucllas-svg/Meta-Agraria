@@ -1,24 +1,19 @@
 <!doctype html>
-<html lang="es">
-<head>
-<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="theme-color" content="#176b45"><meta name="description" content="Meta-Agraria: plataforma académica para preparación universitaria.">
-<link rel="manifest" href="manifest.webmanifest"><link rel="stylesheet" href="styles.css"><title>Meta-Agraria</title>
-</head>
+<html lang="es"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"><meta name="theme-color" content="#176b45"><meta name="description" content="Meta-Agraria: plataforma académica para preparación universitaria."><link rel="manifest" href="manifest.webmanifest"><link rel="stylesheet" href="styles.css"><title>Meta-Agraria</title></head>
 <body>
 <header class="topbar"><div class="brand"><div class="brand-mark">🌱</div><div><strong>Meta-Agraria</strong><span>Tu meta, paso a paso</span></div></div><button id="installBtn" class="install" hidden>Instalar app</button></header>
 <main>
 <section class="hero"><div><p class="eyebrow">UNALM · PREUNIVERSITARIO</p><h1>Organiza tu preparación.</h1><p class="hero-copy">Estudia, practica y avanza hacia tu meta.</p></div><div class="hero-icon">🌿</div></section>
 <section class="profile-card"><div class="profile-head"><div class="avatar">🎓</div><div class="profile-info"><span class="profile-label">MI PERFIL</span><strong>Estudiante UNALM</strong><small id="levelText">Nivel 1 · 0 XP</small></div><div class="streak">🔥 <b id="streak">0</b><small>días</small></div></div><div class="xp-row"><span>Progreso al siguiente nivel</span><b id="xpProgressText">0 / 100 XP</b></div><div class="progress-track"><div id="xpBar" class="progress-fill"></div></div><div class="goal-row"><span>🎯 Meta diaria</span><b id="dailyGoalText">0 / 100 XP</b></div><div class="progress-track goal"><div id="dailyGoalBar" class="progress-fill"></div></div></section>
-<section class="stats"><div><b id="courseCount">0</b><span>Cursos</span></div><div><b id="doneCount">0</b><span>Completados</span></div><div><b id="progress">0%</b><span>Progreso</span></div></section>
-<section class="section"><div class="section-title"><h2>📚 Mis cursos</h2><button id="addCourse" class="text-btn">+ Añadir</button></div><p class="hint">Toca un curso para ver sus temas, practicar y usar flashcards.</p><div id="courses" class="course-grid"></div></section>
+<section class="stats"><div><b id="courseCount">0</b><span>Cursos</span></div><div><b id="doneCount">0</b><span>Temas hechos</span></div><div><b id="progress">0%</b><span>Progreso</span></div></section>
+<section class="section"><div class="section-title"><h2>🎯 Misiones de hoy</h2><span id="missionDate" class="muted"></span></div><div id="missions" class="mission-list"></div></section>
+<section class="section"><div class="section-title"><h2>📚 Mis cursos</h2><button id="addCourse" class="text-btn">+ Añadir</button></div><p class="hint">Toca un curso para abrir sus temas. Abrir un curso NO da XP.</p><div id="courses" class="course-grid"></div></section>
 <section class="section"><div class="section-title"><h2>🏆 Logros</h2><span id="achievementCount" class="muted">0/5</span></div><div id="achievements" class="achievement-grid"></div></section>
-<section class="section"><div class="section-title"><h2>🧠 Estadísticas</h2></div><div class="mini-stats"><div><b id="quizCorrect">0</b><span>Respuestas correctas</span></div><div><b id="quizTotal">0</b><span>Preguntas</span></div><div><b id="accuracy">0%</b><span>Acierto</span></div></div></section>
-<section class="section"><div class="section-title"><h2>🛠️ Herramientas</h2></div><div class="tools"><button class="tool" data-action="timer">⏱️<span>Cronómetro</span></button><button class="tool" data-action="notes">📝<span>Notas rápidas</span></button><button class="tool" data-action="plan">📅<span>Plan de estudio</span></button></div></section>
+<section class="section"><div class="section-title"><h2>🧠 Estadísticas</h2></div><div class="mini-stats"><div><b id="quizCorrect">0</b><span>Correctas</span></div><div><b id="quizTotal">0</b><span>Preguntas</span></div><div><b id="accuracy">0%</b><span>Acierto</span></div></div></section>
+<section class="section"><div class="section-title"><h2>🛠️ Herramientas</h2></div><div class="tools"><button class="tool" data-action="timer">⏱️<span>Pomodoro</span></button><button class="tool" data-action="notes">📝<span>Notas</span></button><button class="tool" data-action="plan">📅<span>Planificador</span></button><button class="tool" data-action="reminder">🔔<span>Recordatorio</span></button></div></section>
 </main>
-<nav class="bottom-nav"><button class="active">⌂<span>Inicio</span></button><button onclick="document.querySelector('#courses').scrollIntoView({behavior:'smooth'})">📖<span>Cursos</span></button><button onclick="document.querySelector('#achievements').scrollIntoView({behavior:'smooth'})">🏆<span>Logros</span></button></nav>
+<nav class="bottom-nav"><button class="active">⌂<span>Inicio</span></button><button onclick="document.querySelector('#courses').scrollIntoView({behavior:'smooth'})">📖<span>Cursos</span></button><button onclick="document.querySelector('#missions').scrollIntoView({behavior:'smooth'})">🎯<span>Misiones</span></button><button onclick="document.querySelector('#achievements').scrollIntoView({behavior:'smooth'})">🏆<span>Logros</span></button></nav>
 <dialog id="courseDialog"><form method="dialog" id="courseForm"><h3>Nuevo curso</h3><input id="courseName" placeholder="Ej. Biología" maxlength="30" required><div class="dialog-actions"><button value="cancel">Cancelar</button><button id="saveCourse" class="primary" value="default">Guardar</button></div></form></dialog>
 <dialog id="studyDialog"><div id="studyContent"></div><button id="closeStudy">Cerrar</button></dialog>
 <dialog id="toolDialog"><div id="toolContent"></div><button id="closeTool">Cerrar</button></dialog>
-<script src="app.js"></script>
-</body></html>
+<script src="app.js"></script></body></html>
