@@ -134,6 +134,15 @@ const scheduleBlocks=[
 function scheduleMinutes(t){const [h,m]=t.split(":").map(Number);return h*60+m}
 function renderSchedulePreview(){
  const el=document.querySelector("#schedulePreview"); if(!el)return;
+ el.innerHTML="<div class='normal-schedule'>"+scheduleBlocks.map(b=>"<div class='normal-schedule-row'><div class='normal-schedule-time'>"+b[0]+"<span>"+b[1]+"</span></div><div class='normal-schedule-subject "+(b[3]===0?"schedule-review":"")+"'><strong>"+(scheduleEmojis[b[2]]||"🎯")+" "+escapeHtml(b[2])+"</strong><small>"+(b[3]?b[3]+" preguntas":"Repaso + simulacro")+"</small></div></div>").join("")+"</div><button class='schedule-open-card' onclick='openSchedule()'>Abrir horario completo</button>";
+}
+function openSchedule(){
+ const td=document.querySelector("#toolDialog"),tc=document.querySelector("#toolContent");
+ tc.innerHTML="<h3>🗓️ Mi horario de estudio</h3><p class='dialog-sub'>04:00 a. m. → 07:30 p. m.</p><div class='normal-schedule full'>"+scheduleBlocks.map(b=>"<div class='normal-schedule-row'><div class='normal-schedule-time'>"+b[0]+"<span>"+b[1]+"</span></div><div class='normal-schedule-subject "+(b[3]===0?"schedule-review":"")+"'><strong>"+(scheduleEmojis[b[2]]||"🎯")+" "+escapeHtml(b[2])+"</strong><small>"+(b[3]?b[3]+" preguntas":"Repaso + simulacro mixto")+"</small></div></div>").join("")+"</div>";
+ td.showModal();
+}
+function renderSchedulePreview(){
+ const el=document.querySelector("#schedulePreview"); if(!el)return;
  el.innerHTML="<div class='schedule-board-preview'><div class='schedule-axis'><span>4:00</span><span>8:00</span><span>12:00</span><span>4:00</span><span>7:30</span></div><div class='schedule-track'>"+scheduleBlocks.map(b=>{const mins=scheduleMinutes(b[1])-scheduleMinutes(b[0]);return "<div class='schedule-block "+(b[3]===0?"schedule-review":"")+"' style='--mins:"+mins+"'><span class='schedule-block-time'>"+b[0]+"–"+b[1]+"</span><strong>"+(scheduleEmojis[b[2]]||"🎯")+" "+escapeHtml(b[2])+"</strong></div>"}).join("")+"</div></div><button class='schedule-open-card' onclick='openSchedule()'>Ver horario completo →</button>";
 }
 function openSchedule(){
