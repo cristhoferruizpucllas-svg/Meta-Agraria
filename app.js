@@ -42,10 +42,77 @@ function render(){const el=document.querySelector("#courses");el.innerHTML=cours
 function escapeHtml(s){return s.replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[m]))}
 
 const studyDialog=document.querySelector("#studyDialog"),studyContent=document.querySelector("#studyContent");
-function openCourse(i){const c=courses[i],done=c.topics.filter(t=>t.done).length;studyContent.innerHTML="<h3>"+c.emoji+" "+escapeHtml(c.name)+"</h3><p class='dialog-sub'>"+done+"/"+c.topics.length+" temas completados · abrir el curso no da XP</p><div class='topic-list'>"+c.topics.map((t,j)=>"<button class='topic "+(t.done?"topic-done":"")+"' data-topic='"+j+"'><span>"+(t.done?"✓":"○")+"</span>"+escapeHtml(t.name)+"<small>"+(t.done?"Completado":"+10 XP al completar")+"</small></button>").join("")+"</div><div class='study-actions'><button id='quizBtn' class='primary'>🧠 Quiz</button><button id='flashBtn'>🃏 Flashcards</button></div>";studyDialog.showModal();document.querySelectorAll(".topic").forEach(b=>b.onclick=()=>toggleTopic(i,Number(b.dataset.topic)));document.querySelector("#quizBtn").onclick=()=>startQuiz(c.name);document.querySelector("#flashBtn").onclick=()=>startFlashcards(c.name)}
-function toggleTopic(ci,ti){const t=courses[ci].topics[ti];if(t.done)return; t.done=true;courses[ci].done=courses[ci].topics.every(x=>x.done);const d=today();localStorage.setItem("meta-topics-day-"+d,String((Number(localStorage.getItem("meta-topics-day-"+d))||0)+1));studyAction(XP_PER_TOPIC);openCourse(ci)}
-function startQuiz(name){const qs=quizBank[name]||[["¿Qué conviene hacer después de aprender un tema?",["Repasarlo","Olvidarlo","Saltarlo","Nada"],0],["¿La práctica mejora el aprendizaje?",["Sí","No","Solo a veces","Nunca"],0],["¿Es útil revisar tus errores?",["Sí","No","Nunca","Da igual"],0]];let n=0,correct=0;function show(){const q=qs[n];studyContent.innerHTML="<h3>🧠 Quiz · "+escapeHtml(name)+"</h3><p class='quiz-count'>Pregunta "+(n+1)+" de "+qs.length+"</p><p class='question'>"+escapeHtml(q[0])+"</p><div class='answers'>"+q[1].map((a,k)=>"<button data-a='"+k+"'>"+escapeHtml(a)+"</button>").join("")+"</div>";document.querySelectorAll(".answers button").forEach(b=>b.onclick=()=>{const selected=Number(b.dataset.a);stats.total++;if(selected===q[2]){stats.correct++;correct++;b.classList.add("correct")}else{b.classList.add("wrong");document.querySelector('.answers button[data-a="'+q[2]+'"]').classList.add("correct")}const d=today();localStorage.setItem("meta-quiz-day-"+d,String((Number(localStorage.getItem("meta-quiz-day-"+d))||0)+1));localStorage.setItem("meta-stats",JSON.stringify(stats));setTimeout(()=>{n++;if(n<qs.length)show();else{studyContent.innerHTML="<h3>🎉 Quiz terminado</h3><p class='result-big'>"+correct+"/"+qs.length+"</p><p>Tu porcentaje: "+Math.round(correct/qs.length*100)+"%</p><button id='again' class='primary'>Volver al curso</button>";document.querySelector("#again").onclick=()=>openCourse(courses.findIndex(c=>c.name===name));render()}},450)})}show()}
-function startFlashcards(name){const cards=flashcards[name]||catalog[name].slice(0,4).map(t=>[t,"Repasa este concepto y comprueba tu comprensión con tus apuntes."]);let i=0,flipped=false;function show(){const card=cards[i];studyContent.innerHTML="<h3>🃏 Flashcards · "+escapeHtml(name)+"</h3><p class='quiz-count'>Tarjeta "+(i+1)+" de "+cards.length+"</p><button id='flashCard' class='flash-card'><strong>"+escapeHtml(card[0])+"</strong><span>"+(flipped?escapeHtml(card[1]):"Toca para ver la respuesta")+"</span></button><div class='flash-nav'><button id='prev'>←</button><button id='next' class='primary'>"+(i===cards.length-1?"Terminar":"Siguiente →")+"</button></div>";document.querySelector("#flashCard").onclick=()=>{flipped=!flipped;show()};document.querySelector("#prev").onclick=()=>{i=(i-1+cards.length)%cards.length;flipped=false;show()};document.querySelector("#next").onclick=()=>{if(i===cards.length-1)openCourse(courses.findIndex(c=>c.name===name));else{i++;flipped=false;show()}}}show()}
+function openCourse(i){
+  const c=courses[i],done=c.topics.filter(t=>t.done).length;
+  studyContent.innerHTML="<h3>"+c.emoji+" "+escapeHtml(c.name)+"</h3><p class='dialog-sub'>"+done+"/"+c.topics.length+" temas completados · abrir el curso no da XP</p><div class='topic-list'>"+
+    c.topics.map((t,j)=>"<button class='topic "+(t.done?"topic-done":"")+"' data-topic='"+j+"'><span>"+(t.done?"✓":"○")+"</span>"+escapeHtml(t.name)+"<small>"+(t.done?"Completado · tocar para estudiar":"Estudiar tema · +10 XP al completar")+"</small></button>").join("")+
+    "</div>";
+  studyDialog.showModal();
+  document.querySelectorAll(".topic").forEach(b=>b.onclick=()=>openTopicStudy(i,Number(b.dataset.topic)));
+}
+function topicData(courseIndex,topicIndex){
+  const c=courses[courseIndex],t=c.topics[topicIndex];
+  return {course:c,topic:t,content:window.META_CONTENT.get(c.name,t.name)};
+}
+function openTopicStudy(ci,ti){
+  const {course,topic,content}=topicData(ci,ti);
+  studyContent.innerHTML="<div class='topic-header'><button id='backCourse' class='back-btn'>← "+escapeHtml(course.name)+"</button><span class='topic-status'>"+(topic.done?"✓ Completado":"Tema pendiente")+"</span></div>"+
+    "<h3>"+escapeHtml(topic.name)+"</h3>"+
+    "<div class='study-tabs'><button class='tab active' data-tab='theory'>📖 Teoría</button><button class='tab' data-tab='cards'>🃏 Flashcards</button><button class='tab' data-tab='quiz'>🧠 Quiz</button></div>"+
+    "<div id='topicPanel'></div>";
+  document.querySelector("#backCourse").onclick=()=>openCourse(ci);
+  document.querySelectorAll(".tab").forEach(b=>b.onclick=()=>showTopicTab(ci,ti,b.dataset.tab));
+  showTopicTab(ci,ti,"theory");
+}
+function showTopicTab(ci,ti,tab){
+  const {course,topic,content}=topicData(ci,ti),panel=document.querySelector("#topicPanel");
+  if(!panel)return;
+  document.querySelectorAll(".tab").forEach(b=>b.classList.toggle("active",b.dataset.tab===tab));
+  if(tab==="theory"){
+    panel.innerHTML="<section class='theory-card'><h4>📌 ¿Qué debes entender?</h4><p>"+escapeHtml(content.summary)+"</p><h4>🔑 Puntos clave</h4><ul>"+content.keys.map(x=>"<li>"+escapeHtml(x)+"</li>").join("")+"</ul></section>"+
+      "<div class='topic-complete'>"+(topic.done?"<span class='completed-label'>✓ Tema completado</span>":"<button id='completeTopic' class='primary'>✓ Marcar tema como completado · +10 XP</button>")+"</div>";
+    const btn=document.querySelector("#completeTopic"); if(btn)btn.onclick=()=>toggleTopic(ci,ti);
+  }else if(tab==="cards"){
+    let i=0,flipped=false;
+    const renderCard=()=>{
+      const cards=content.cards||[],card=cards[i]||[topic.name,"Repasa este concepto y comprueba tu comprensión."];
+      panel.innerHTML="<p class='quiz-count'>Tarjeta "+(i+1)+" de "+cards.length+"</p><button id='unitCard' class='flash-card'><strong>"+escapeHtml(card[0])+"</strong><span>"+(flipped?escapeHtml(card[1]):"Toca para ver la respuesta")+"</span></button><div class='flash-nav'><button id='prevCard'>←</button><button id='nextCard' class='primary'>"+(i===cards.length-1?"Terminar":"Siguiente →")+"</button></div>";
+      document.querySelector("#unitCard").onclick=()=>{flipped=!flipped;renderCard()};
+      document.querySelector("#prevCard").onclick=()=>{i=(i-1+cards.length)%cards.length;flipped=false;renderCard()};
+      document.querySelector("#nextCard").onclick=()=>{if(i===cards.length-1)showTopicTab(ci,ti,"theory");else{i++;flipped=false;renderCard()}};
+    };
+    renderCard();
+  }else startTopicQuiz(ci,ti);
+}
+function startTopicQuiz(ci,ti){
+  const {course,topic,content}=topicData(ci,ti);
+  const cards=content.cards||[];
+  const qs=cards.map((card,i)=>[i===0?"¿Cuál afirmación resume mejor este punto del tema?":"¿Qué debes recordar sobre «"+card[0]+"»?",[card[1],card[0]+" es un detalle secundario sin relación.","No tiene aplicación en esta unidad.","Es una definición que debe confundirse con otro concepto."],0]);
+  let n=0,correct=0;
+  function show(){
+    const q=qs[n]||["¿Qué conviene hacer para dominar este tema?",["Comprender y practicar","Memorizar sin entender","Saltar los ejercicios","No revisar errores"],0];
+    studyContent.innerHTML="<div class='topic-header'><button id='backTopic' class='back-btn'>← Tema</button><span class='topic-status'>Pregunta "+(n+1)+"/"+qs.length+"</span></div><h3>🧠 Quiz · "+escapeHtml(topic.name)+"</h3><p class='question'>"+escapeHtml(q[0])+"</p><div class='answers'>"+q[1].map((a,k)=>"<button data-a='"+k+"'>"+escapeHtml(a)+"</button>").join("")+"</div>";
+    document.querySelector("#backTopic").onclick=()=>openTopicStudy(ci,ti);
+    document.querySelectorAll(".answers button").forEach(b=>b.onclick=()=>{
+      document.querySelectorAll(".answers button").forEach(x=>x.disabled=true);
+      const selected=Number(b.dataset.a);stats.total++;
+      if(selected===q[2]){stats.correct++;correct++;b.classList.add("correct")}else{b.classList.add("wrong");document.querySelector('.answers button[data-a="'+q[2]+'"]').classList.add("correct")}
+      const d=today();localStorage.setItem("meta-quiz-day-"+d,String((Number(localStorage.getItem("meta-quiz-day-"+d))||0)+1));localStorage.setItem("meta-stats",JSON.stringify(stats));
+      setTimeout(()=>{n++;if(n<qs.length)show();else{
+        studyContent.innerHTML="<h3>🎉 Quiz del tema terminado</h3><p class='result-big'>"+correct+"/"+qs.length+"</p><p>Tu porcentaje: "+Math.round(correct/Math.max(qs.length,1)*100)+"%</p><button id='backTopic' class='primary'>Volver al tema</button>";
+        document.querySelector("#backTopic").onclick=()=>openTopicStudy(ci,ti);render();
+      }},500);
+    });
+  }
+  show();
+}
+function toggleTopic(ci,ti){
+  const t=courses[ci].topics[ti];
+  if(t.done)return;
+  t.done=true; courses[ci].done=courses[ci].topics.every(x=>x.done);
+  const d=today();localStorage.setItem("meta-topics-day-"+d,String((Number(localStorage.getItem("meta-topics-day-"+d))||0)+1));
+  studyAction(XP_PER_TOPIC); openTopicStudy(ci,ti);
+}
 
 const cd=document.querySelector("#courseDialog");document.querySelector("#addCourse").onclick=()=>cd.showModal();document.querySelector("#courseForm").onsubmit=e=>{e.preventDefault();const n=document.querySelector("#courseName").value.trim();if(n){courses.push({name:n,emoji:"📚",done:false,topics:[{name:"Tema 1",done:false},{name:"Tema 2",done:false},{name:"Tema 3",done:false},{name:"Tema 4",done:false}]});save();cd.close();document.querySelector("#courseName").value=""}};document.querySelector("#closeStudy").onclick=()=>studyDialog.close();
 
