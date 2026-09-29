@@ -1,91 +1,63 @@
-const defaults=[["Razonamiento Verbal","🧠"],["Razonamiento Matemático","🔢"],["Aritmética","➗"],["Álgebra","📐"],["Geometría","📏"],["Trigonometría","📊"],["Biología","🧬"],["Química","⚗️"],["Física","⚛️"],["Historia","🏛️"],["Geografía","🌎"],["Economía","📈"]];
-const XP_PER_COURSE=25, DAILY_GOAL=100;
-let courses=JSON.parse(localStorage.getItem("meta-courses")||"null")||defaults.map(([name,emoji])=>({name,emoji,done:false}));
+const catalog={
+"Razonamiento Verbal":["Comprensión lectora","Sinónimos y antónimos","Analogías","Conectores"],
+"Razonamiento Matemático":["Sucesiones","Distribuciones y patrones","Conteo","Problemas de lógica"],
+"Aritmética":["Razones y proporciones","Porcentajes","Promedios","Regla de tres"],
+"Álgebra":["Polinomios","Productos notables","Ecuaciones","Inecuaciones"],
+"Geometría":["Ángulos y triángulos","Congruencia","Circunferencia","Áreas"],
+"Trigonometría":["Razones trigonométricas","Identidades","Resolución de triángulos","Ángulos notables"],
+"Biología":["Biología celular","Genética","Evolución","Ecología"],
+"Química":["Materia y átomo","Tabla periódica","Enlace químico","Estequiometría"],
+"Física":["Cinemática","Leyes de Newton","Trabajo y energía","Fluidos"],
+"Historia":["Edad Antigua","Edad Media","Historia del Perú","Mundo contemporáneo"],
+"Geografía":["Geografía como ciencia","Relieve peruano","Climas","Recursos naturales"],
+"Economía":["Conceptos básicos","Oferta y demanda","Mercado","Macroeconomía"]
+};
+const emojis={"Razonamiento Verbal":"🧠","Razonamiento Matemático":"🔢","Aritmética":"➗","Álgebra":"📐","Geometría":"📏","Trigonometría":"📊","Biología":"🧬","Química":"⚗️","Física":"⚛️","Historia":"🏛️","Geografía":"🌎","Economía":"📈"};
+const quizBank={
+"Biología":[["¿Cuál es la unidad básica de la vida?",["Tejido","Célula","Órgano","Sistema"],1],["¿Qué molécula almacena la información genética?",["ATP","Glucosa","ADN","Agua"],2],["¿Dónde ocurre principalmente la respiración celular?",["Núcleo","Mitocondria","Ribosoma","Golgi"],1]],
+"Química":[["¿Qué partícula tiene carga negativa?",["Protón","Neutrón","Electrón","Núcleo"],2],["¿Qué tipo de enlace comparte electrones?",["Iónico","Covalente","Metálico","Nuclear"],1],["¿Cuál es el símbolo del oxígeno?",["O","Ox","Og","O2-"],0]],
+"Física":[["¿Cuál es la unidad SI de fuerza?",["Joule","Newton","Watt","Pascal"],1],["Si la velocidad es constante, la aceleración es...",["Cero","Máxima","Negativa","Variable"],0],["¿Qué ley relaciona fuerza, masa y aceleración?",["Primera de Newton","Segunda de Newton","Tercera de Newton","Hooke"],1]],
+"Aritmética":[["¿Cuánto es el 20% de 150?",["20","25","30","35"],2],["Si 2:3 = x:12, x vale...",["6","8","9","10"],1],["El promedio de 4, 6 y 8 es...",["5","6","7","8"],1]],
+"Álgebra":[["Si x+5=12, x vale...",["5","6","7","8"],2],["¿Cuál es el grado de 3x⁴+2x?",["2","3","4","5"],2],["(a+b)² es igual a...",["a²+b²","a²+2ab+b²","a²-ab+b²","2a+2b"],1]],
+"Geometría":[["La suma de ángulos internos de un triángulo es...",["90°","180°","270°","360°"],1],["Un cuadrado de lado 5 tiene área...",["10","20","25","30"],2],["Un ángulo recto mide...",["45°","90°","180°","360°"],1]],
+"Trigonometría":[["sen 30° vale...",["1/2","√2/2","√3/2","1"],0],["cos 60° vale...",["0","1/2","√2/2","1"],1],["tan 45° vale...",["0","1/2","1","√3"],2]],
+"Razonamiento Matemático":[["Si una secuencia aumenta 3, 6, 9, el siguiente término es...",["10","11","12","15"],2],["¿Cuántos lados tiene un hexágono?",["5","6","7","8"],1],["Si hoy es lunes, en 10 días será...",["Miércoles","Jueves","Viernes","Sábado"],1]],
+"Razonamiento Verbal":[["Antónimo de 'efímero':",["Pasajero","Duradero","Breve","Rápido"],1],["Sinónimo de 'óptimo':",["Pésimo","Regular","Excelente","Difícil"],2],["Un texto que defiende una tesis es principalmente...",["Narrativo","Argumentativo","Descriptivo","Poético"],1]],
+"Historia":[["¿En qué continente surgió la civilización egipcia?",["Asia","Europa","África","América"],2],["La Primera Guerra Mundial comenzó en...",["1914","1918","1939","1945"],0],["La Guerra Fría enfrentó principalmente a...",["Roma y Grecia","EE.UU. y URSS","China y Japón","Francia y Alemania"],1]],
+"Geografía":[["La capa sólida externa de la Tierra se denomina...",["Núcleo","Manto","Corteza","Astenosfera"],2],["¿Cuál es el océano más grande?",["Atlántico","Índico","Ártico","Pacífico"],3],["La línea que divide la Tierra en hemisferios norte y sur es...",["Meridiano 0°","Ecuador","Trópico de Cáncer","Círculo polar"],1]],
+"Economía":[["La ley de la demanda indica que, ceteris paribus, si sube el precio...",["Sube la cantidad demandada","Baja la cantidad demandada","No cambia","Se duplica"],1],["El dinero funciona como medio de...",["Producción","Intercambio","Clima","Transporte"],1],["La inflación es un aumento general y sostenido de...",["Producción","Precios","Salarios solamente","Exportaciones"],1]]
+};
+const flashcards={
+"Biología":[["Mitocondria","Orgánulo asociado a la producción de ATP mediante respiración celular."],["ADN","Molécula que almacena la información genética."],["Ósmosis","Movimiento de agua a través de una membrana semipermeable hacia la zona de mayor concentración de solutos."]],
+"Química":[["Electronegatividad","Tendencia de un átomo a atraer electrones en un enlace."],["Molécula polar","Presenta distribución desigual de carga y un momento dipolar neto."],["Enlace covalente","Enlace en el que los átomos comparten pares de electrones."]],
+"Física":[["Fuerza neta","Suma vectorial de todas las fuerzas que actúan sobre un cuerpo."],["Trabajo","W = F·d·cosθ cuando una fuerza constante realiza desplazamiento."],["Peso","Fuerza gravitatoria sobre un cuerpo: P = m·g."]]
+};
+const defaults=Object.entries(emojis).map(([name,emoji])=>({name,emoji,done:false,topics:(catalog[name]||[]).map(name=>({name,done:false}))}));
+let courses=JSON.parse(localStorage.getItem("meta-courses")||"null")||defaults;
+courses=courses.map(c=>({name:c.name,emoji:c.emoji||emojis[c.name]||"📚",done:!!c.done,topics:Array.isArray(c.topics)?c.topics:(catalog[c.name]||[]).map(name=>({name,done:false}))}));
+const XP_PER_TOPIC=10,DAILY_GOAL=100;
 let game=JSON.parse(localStorage.getItem("meta-game")||"null")||{xp:0,streak:0,lastStudyDate:null,dailyXp:0,dailyDate:null,achievements:[]};
+let stats=JSON.parse(localStorage.getItem("meta-stats")||"null")||{correct:0,total:0};
 
 function today(){return new Date().toLocaleDateString("en-CA")}
 function yesterday(){const d=new Date();d.setDate(d.getDate()-1);return d.toLocaleDateString("en-CA")}
-function save(){localStorage.setItem("meta-courses",JSON.stringify(courses));localStorage.setItem("meta-game",JSON.stringify(game));render()}
-function levelInfo(){const level=Math.floor(game.xp/100)+1;const current=game.xp%100;return{level,current}}
-function studyAction(xp=XP_PER_COURSE){
-  const d=today();
-  if(game.lastStudyDate!==d){game.streak=game.lastStudyDate===yesterday()?game.streak+1:1;game.lastStudyDate=d}
-  if(game.dailyDate!==d){game.dailyDate=d;game.dailyXp=0}
-  game.xp+=xp;game.dailyXp+=xp;checkAchievements();save()
-}
-function checkAchievements(){
-  const done=courses.filter(c=>c.done).length;
-  const list=[];
-  if(game.xp>=XP_PER_COURSE)list.push("first");
-  if(game.streak>=3)list.push("streak3");
-  if(game.streak>=7)list.push("streak7");
-  if(game.xp>=100)list.push("xp100");
-  if(done>=5)list.push("courses5");
-  game.achievements=[...new Set(list)]
-}
-const achievements=[
-  ["first","🌱","Primer paso","Completa tu primer curso"],
-  ["streak3","🔥","Racha de 3","Estudia 3 días seguidos"],
-  ["streak7","⚡","Racha de 7","Estudia 7 días seguidos"],
-  ["xp100","⭐","100 XP","Consigue 100 XP"],
-  ["courses5","🏆","Cinco cursos","Completa 5 cursos"]
-];
-function renderAchievements(){
-  const el=document.querySelector("#achievements");
-  el.innerHTML=achievements.map(([id,icon,title,desc])=>{
-    const on=game.achievements.includes(id);
-    return '<article class="achievement '+(on?"unlocked":"locked")+'"><div class="achievement-icon">'+icon+'</div><div><strong>'+title+'</strong><small>'+desc+'</small></div></article>'
-  }).join("");
-  document.querySelector("#achievementCount").textContent=game.achievements.length+"/"+achievements.length
-}
-function render(){
-  const el=document.querySelector("#courses");
-  el.innerHTML=courses.map((c,i)=>'<article class="course '+(c.done?"done":"")+'" data-i="'+i+'"><div class="emoji">'+c.emoji+'</div><strong>'+escapeHtml(c.name)+'</strong><small>'+(c.done?"Completado":"Pendiente")+'</small></article>').join("");
-  const done=courses.filter(c=>c.done).length;
-  document.querySelector("#courseCount").textContent=courses.length;
-  document.querySelector("#doneCount").textContent=done;
-  document.querySelector("#progress").textContent=Math.round(done/Math.max(courses.length,1)*100)+"%";
-  const {level,current}=levelInfo();
-  document.querySelector("#levelText").textContent="Nivel "+level+" · "+game.xp+" XP";
-  document.querySelector("#streak").textContent=game.streak;
-  document.querySelector("#xpProgressText").textContent=current+" / 100 XP";
-  document.querySelector("#xpBar").style.width=current+"%";
-  const daily=Math.min(game.dailyXp,DAILY_GOAL);
-  document.querySelector("#dailyGoalText").textContent=daily+" / "+DAILY_GOAL+" XP";
-  document.querySelector("#dailyGoalBar").style.width=(daily/DAILY_GOAL*100)+"%";
-  renderAchievements();
-  document.querySelectorAll(".course").forEach(x=>x.onclick=()=>{
-    const i=+x.dataset.i;
-    if(!courses[i].done){courses[i].done=true;studyAction(XP_PER_COURSE)}
-    else{courses[i].done=false;checkAchievements();save()}
-  })
-}
+function save(){localStorage.setItem("meta-courses",JSON.stringify(courses));localStorage.setItem("meta-game",JSON.stringify(game));localStorage.setItem("meta-stats",JSON.stringify(stats));render()}
+function studyAction(xp=XP_PER_TOPIC){const d=today();if(game.lastStudyDate!==d){game.streak=game.lastStudyDate===yesterday()?game.streak+1:1;game.lastStudyDate=d}if(game.dailyDate!==d){game.dailyDate=d;game.dailyXp=0}game.xp+=xp;game.dailyXp+=xp;checkAchievements();save()}
+function levelInfo(){return{level:Math.floor(game.xp/100)+1,current:game.xp%100}}
+function checkAchievements(){const done=courses.filter(c=>c.done).length;const list=[];if(game.xp>=XP_PER_TOPIC)list.push("first");if(game.streak>=3)list.push("streak3");if(game.streak>=7)list.push("streak7");if(game.xp>=100)list.push("xp100");if(done>=5)list.push("courses5");game.achievements=[...new Set(list)]}
+const achievements=[["first","🌱","Primer paso","Completa tu primer tema"],["streak3","🔥","Racha de 3","Estudia 3 días seguidos"],["streak7","⚡","Racha de 7","Estudia 7 días seguidos"],["xp100","⭐","100 XP","Consigue 100 XP"],["courses5","🏆","Cinco cursos","Completa 5 cursos"]];
+function renderAchievements(){document.querySelector("#achievements").innerHTML=achievements.map(([id,icon,title,desc])=>'<article class="achievement '+(game.achievements.includes(id)?"unlocked":"locked")+'"><div class="achievement-icon">'+icon+'</div><div><strong>'+title+'</strong><small>'+desc+'</small></div></article>').join("");document.querySelector("#achievementCount").textContent=game.achievements.length+"/"+achievements.length}
+function render(){const el=document.querySelector("#courses");el.innerHTML=courses.map((c,i)=>{const total=c.topics.length,done=c.topics.filter(t=>t.done).length;return '<article class="course '+(c.done?"done":"")+'" data-i="'+i+'"><div class="emoji">'+c.emoji+'</div><strong>'+escapeHtml(c.name)+'</strong><small>'+done+"/"+total+" temas · "+Math.round(done/Math.max(total,1)*100)+"%</small><div class='course-mini'><span style='width:'+(done/Math.max(total,1)*100)+'%'></span></div></article>'}).join("");const totalTopics=courses.reduce((n,c)=>n+c.topics.length,0),doneTopics=courses.reduce((n,c)=>n+c.topics.filter(t=>t.done).length,0);document.querySelector("#courseCount").textContent=courses.length;document.querySelector("#doneCount").textContent=doneTopics;document.querySelector("#progress").textContent=Math.round(doneTopics/Math.max(totalTopics,1)*100)+"%";const {level,current}=levelInfo();document.querySelector("#levelText").textContent="Nivel "+level+" · "+game.xp+" XP";document.querySelector("#streak").textContent=game.streak;document.querySelector("#xpProgressText").textContent=current+" / 100 XP";document.querySelector("#xpBar").style.width=current+"%";const daily=Math.min(game.dailyXp,DAILY_GOAL);document.querySelector("#dailyGoalText").textContent=daily+" / "+DAILY_GOAL+" XP";document.querySelector("#dailyGoalBar").style.width=daily+"%";document.querySelector("#quizCorrect").textContent=stats.correct;document.querySelector("#quizTotal").textContent=stats.total;document.querySelector("#accuracy").textContent=(stats.total?Math.round(stats.correct/stats.total*100):0)+"%";renderAchievements();document.querySelectorAll(".course").forEach(x=>x.onclick=()=>openCourse(+x.dataset.i))}
 function escapeHtml(s){return s.replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[m]))}
+
+const studyDialog=document.querySelector("#studyDialog"),studyContent=document.querySelector("#studyContent");
+function openCourse(i){const c=courses[i];const done=c.topics.filter(t=>t.done).length;studyContent.innerHTML="<h3>"+c.emoji+" "+escapeHtml(c.name)+"</h3><p class='dialog-sub'>"+done+"/"+c.topics.length+" temas completados</p><div class='topic-list'>"+c.topics.map((t,j)=>"<button class='topic "+(t.done?"topic-done":"")+"' data-topic='"+j+"'><span>"+(t.done?"✓":"○")+"</span>"+escapeHtml(t.name)+"<small>"+(t.done?"Completado":"+10 XP")+"</small></button>").join("")+"</div><div class='study-actions'><button id='quizBtn' class='primary'>🧠 Quiz</button><button id='flashBtn'>🃏 Flashcards</button></div>";studyDialog.showModal();document.querySelectorAll(".topic").forEach(b=>b.onclick=()=>toggleTopic(i,+b.dataset.topic));document.querySelector("#quizBtn").onclick=()=>startQuiz(c.name);document.querySelector("#flashBtn").onclick=()=>startFlashcards(c.name)}
+function toggleTopic(ci,ti){const t=courses[ci].topics[ti];if(!t.done){t.done=true;studyAction(XP_PER_TOPIC)}else{t.done=false;save()}courses[ci].done=courses[ci].topics.length>0&&courses[ci].topics.every(x=>x.done);save();openCourse(ci)}
+function startQuiz(name){const qs=quizBank[name]||[["¿Listo para estudiar?",["Sí","Todavía no","Quizás","No"],0],["¿Qué conviene hacer después de aprender un tema?",["Repasarlo","Olvidarlo","Saltarlo","Nada"],0],["¿La práctica mejora el aprendizaje?",["Sí","No","Solo a veces","Nunca"],0]];let n=0,correct=0;function show(){const q=qs[n];studyContent.innerHTML="<h3>🧠 Quiz · "+escapeHtml(name)+"</h3><p class='quiz-count'>Pregunta "+(n+1)+" de "+qs.length+"</p><p class='question'>"+escapeHtml(q[0])+"</p><div class='answers'>"+q[1].map((a,k)=>"<button data-a='"+k+"'>"+escapeHtml(a)+"</button>").join("")+"</div>";document.querySelectorAll(".answers button").forEach(b=>b.onclick=()=>{const selected=+b.dataset.a;stats.total++;if(selected===q[2]){stats.correct++;correct++;b.classList.add("correct")}else{b.classList.add("wrong");document.querySelector('.answers button[data-a="'+q[2]+'"]').classList.add("correct")}setTimeout(()=>{n++;if(n<qs.length)show();else{localStorage.setItem("meta-stats",JSON.stringify(stats));studyContent.innerHTML="<h3>🎉 Quiz terminado</h3><p class='result-big'>"+correct+"/"+qs.length+"</p><p>Tu porcentaje: "+Math.round(correct/qs.length*100)+"%</p><button id='again' class='primary'>Volver al curso</button>";document.querySelector("#again").onclick=()=>openCourse(courses.findIndex(c=>c.name===name));render()}},450)})}show()}
+function startFlashcards(name){const cards=flashcards[name]||catalog[name].slice(0,3).map(t=>[t,"Repasa este concepto y luego comprueba tu comprensión."]);let i=0,flipped=false;function show(){const card=cards[i];studyContent.innerHTML="<h3>🃏 Flashcards · "+escapeHtml(name)+"</h3><p class='quiz-count'>Tarjeta "+(i+1)+" de "+cards.length+"</p><button id='flashCard' class='flash-card'><strong>"+escapeHtml(card[0])+"</strong><span>"+(flipped?escapeHtml(card[1]):"Toca para ver la respuesta")+"</span></button><div class='flash-nav'><button id='prev'>←</button><button id='next' class='primary'>"+(i===cards.length-1?"Terminar":"Siguiente →")+"</button></div>";document.querySelector("#flashCard").onclick=()=>{flipped=!flipped;show()};document.querySelector("#prev").onclick=()=>{i=(i-1+cards.length)%cards.length;flipped=false;show()};document.querySelector("#next").onclick=()=>{if(i===cards.length-1)openCourse(courses.findIndex(c=>c.name===name));else{i++;flipped=false;show()}}}show()}
+
 checkAchievements();render();
-
-const cd=document.querySelector("#courseDialog");
-document.querySelector("#addCourse").onclick=()=>cd.showModal();
-document.querySelector("#courseForm").onsubmit=e=>{
-  e.preventDefault();
-  const n=document.querySelector("#courseName").value.trim();
-  if(n){courses.push({name:n,emoji:"📚",done:false});save();cd.close();document.querySelector("#courseName").value=""}
-};
-
-let deferredPrompt;
-window.addEventListener("beforeinstallprompt",e=>{e.preventDefault();deferredPrompt=e;document.querySelector("#installBtn").hidden=false});
-document.querySelector("#installBtn").onclick=async()=>{if(!deferredPrompt)return;deferredPrompt.prompt();await deferredPrompt.userChoice;deferredPrompt=null;document.querySelector("#installBtn").hidden=true};
-if("serviceWorker"in navigator)window.addEventListener("load",()=>navigator.serviceWorker.register("sw.js"));
-
-const td=document.querySelector("#toolDialog"),tc=document.querySelector("#toolContent");
-document.querySelectorAll(".tool").forEach(b=>b.onclick=()=>{
-  const a=b.dataset.action;
-  if(a==="timer")tc.innerHTML="<h3>Cronómetro</h3><p id='clock'>25:00</p><button id='start' class='primary'>Iniciar</button>";
-  if(a==="notes")tc.innerHTML="<h3>Notas rápidas</h3><textarea id='note' style='width:100%;height:130px;border:1px solid #d8e1db;border-radius:10px;padding:10px' placeholder='Escribe aquí...'>"+(localStorage.getItem("meta-note")||"")+"</textarea><button id='start' class='primary'>Guardar</button>";
-  if(a==="plan")tc.innerHTML="<h3>Plan de estudio</h3><p>Elige un curso y márcalo como completado al terminar tu sesión.</p>";
-  td.showModal();
-  if(a==="timer")document.querySelector("#start").onclick=()=>{
-    let s=1500;const out=document.querySelector("#clock");const id=setInterval(()=>{s--;out.textContent=Math.floor(s/60).toString().padStart(2,"0")+":"+String(s%60).padStart(2,"0");if(s<=0)clearInterval(id)},1000)
-  };
-  if(a==="notes")document.querySelector("#start").onclick=()=>{localStorage.setItem("meta-note",document.querySelector("#note").value);td.close()}
-});
-document.querySelector("#closeTool").onclick=()=>td.close();
+const cd=document.querySelector("#courseDialog");document.querySelector("#addCourse").onclick=()=>cd.showModal();document.querySelector("#courseForm").onsubmit=e=>{e.preventDefault();const n=document.querySelector("#courseName").value.trim();if(n){courses.push({name:n,emoji:"📚",done:false,topics:[{name:"Tema 1",done:false},{name:"Tema 2",done:false},{name:"Tema 3",done:false},{name:"Tema 4",done:false}]});save();cd.close();document.querySelector("#courseName").value=""}};
+document.querySelector("#closeStudy").onclick=()=>studyDialog.close();
+let deferredPrompt;window.addEventListener("beforeinstallprompt",e=>{e.preventDefault();deferredPrompt=e;document.querySelector("#installBtn").hidden=false});document.querySelector("#installBtn").onclick=async()=>{if(!deferredPrompt)return;deferredPrompt.prompt();await deferredPrompt.userChoice;deferredPrompt=null;document.querySelector("#installBtn").hidden=true};if("serviceWorker"in navigator)window.addEventListener("load",()=>navigator.serviceWorker.register("sw.js"));
+const td=document.querySelector("#toolDialog"),tc=document.querySelector("#toolContent");document.querySelectorAll(".tool").forEach(b=>b.onclick=()=>{const a=b.dataset.action;if(a==="timer")tc.innerHTML="<h3>Cronómetro</h3><p id='clock'>25:00</p><button id='start' class='primary'>Iniciar</button>";if(a==="notes")tc.innerHTML="<h3>Notas rápidas</h3><textarea id='note' style='width:100%;height:130px;border:1px solid #d8e1db;border-radius:10px;padding:10px' placeholder='Escribe aquí...'>"+(localStorage.getItem("meta-note")||"")+"</textarea><button id='start' class='primary'>Guardar</button>";if(a==="plan")tc.innerHTML="<h3>Plan de estudio</h3><p>Elige un curso, completa temas y practica con quiz y flashcards.</p>";td.showModal();if(a==="timer")document.querySelector("#start").onclick=()=>{let s=1500;const out=document.querySelector("#clock");const id=setInterval(()=>{s--;out.textContent=Math.floor(s/60).toString().padStart(2,"0")+":"+String(s%60).padStart(2,"0");if(s<=0)clearInterval(id)},1000)};if(a==="notes")document.querySelector("#start").onclick=()=>{localStorage.setItem("meta-note",document.querySelector("#note").value);td.close()}});document.querySelector("#closeTool").onclick=()=>td.close();
