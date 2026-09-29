@@ -131,15 +131,15 @@ const scheduleBlocks=[
  ["18:00","18:45","Trigonometría",5],
  ["18:45","19:30","Repaso / simulacro mixto",0]
 ];
+function scheduleMinutes(t){const [h,m]=t.split(":").map(Number);return h*60+m}
 function renderSchedulePreview(){
  const el=document.querySelector("#schedulePreview"); if(!el)return;
- el.innerHTML=scheduleBlocks.slice(0,4).map(b=>"<div class='schedule-mini'><span>"+b[0]+"–"+b[1]+"</span><strong>"+(scheduleEmojis[b[2]]||"🎯")+" "+escapeHtml(b[2])+"</strong><small>"+(b[3]?b[3]+" preguntas":"cierre")+"</small></div>").join("");
+ el.innerHTML="<div class='schedule-board-preview'><div class='schedule-axis'><span>4:00</span><span>8:00</span><span>12:00</span><span>4:00</span><span>7:30</span></div><div class='schedule-track'>"+scheduleBlocks.map(b=>{const mins=scheduleMinutes(b[1])-scheduleMinutes(b[0]);return "<div class='schedule-block "+(b[3]===0?"schedule-review":"")+"' style='--mins:"+mins+"'><span class='schedule-block-time'>"+b[0]+"–"+b[1]+"</span><strong>"+(scheduleEmojis[b[2]]||"🎯")+" "+escapeHtml(b[2])+"</strong></div>"}).join("")+"</div></div><button class='schedule-open-card' onclick='openSchedule()'>Ver horario completo →</button>";
 }
 function openSchedule(){
  const td=document.querySelector("#toolDialog"),tc=document.querySelector("#toolContent");
- tc.innerHTML="<h3>🗓️ Horario diario UNALM</h3><p class='dialog-sub'>04:00 a. m. → 07:30 p. m. · 100 preguntas · mayor peso = mayor tiempo.</p><div class='schedule-full'>"+
- scheduleBlocks.map(b=>"<div class='schedule-row "+(b[3]===0?"schedule-review":"")+"'><div class='schedule-time'>"+b[0]+"<br><span>"+b[1]+"</span></div><div class='schedule-main'><strong>"+(scheduleEmojis[b[2]]||"🎯")+" "+escapeHtml(b[2])+"</strong><small>"+(b[3]?b[3]+" preguntas · peso "+b[3]+"%":"Repaso, errores y mini simulacro de las materias del día")+"</small></div></div>").join("")+
- "</div><div class='schedule-note'><strong>📌 Cómo usarlo</strong><span>En cada bloque: teoría → ejercicios → preguntas tipo examen. En el bloque final: repasa errores y mezcla cursos.</span></div>";
+ tc.innerHTML="<div class='schedule-title'><span>🗓️</span><div><h3>Horario diario UNALM</h3><p>04:00 a. m. → 07:30 p. m.</p></div></div><div class='schedule-timeline'>"+
+ scheduleBlocks.map(b=>{const mins=scheduleMinutes(b[1])-scheduleMinutes(b[0]);return "<div class='timeline-row'><div class='timeline-time'>"+b[0]+"<span>"+b[1]+"</span></div><div class='timeline-line'><div class='timeline-dot'></div><div class='schedule-block schedule-block-full "+(b[3]===0?"schedule-review":"")+" style='--mins:"+mins+"'><strong>"+(scheduleEmojis[b[2]]||"🎯")+" "+escapeHtml(b[2])+"</strong><span>"+(b[3]?b[3]+" preguntas del examen":"Repaso + simulacro mixto")+"</span></div></div></div>"}).join("")+"</div><div class='schedule-note'><strong>📌 Método</strong><span>Teoría → ejercicios → preguntas tipo examen. El último bloque es para errores y simulacro.</span></div>";
  td.showModal();
 }
 document.querySelector("#openSchedule").onclick=openSchedule;
