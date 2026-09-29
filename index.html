@@ -20,9 +20,25 @@
       <div>
         <p class="eyebrow">UNALM · PREUNIVERSITARIO</p>
         <h1>Organiza tu preparación.</h1>
-        <p class="hero-copy">Cursos, progreso y herramientas de estudio en un solo lugar.</p>
+        <p class="hero-copy">Estudia, gana XP y avanza hacia tu meta.</p>
       </div>
       <div class="hero-icon">🌿</div>
+    </section>
+
+    <section class="profile-card">
+      <div class="profile-head">
+        <div class="avatar">🎓</div>
+        <div class="profile-info">
+          <span class="profile-label">MI PERFIL</span>
+          <strong id="profileName">Estudiante UNALM</strong>
+          <small id="levelText">Nivel 1 · 0 XP</small>
+        </div>
+        <div class="streak">🔥 <b id="streak">0</b><small>días</small></div>
+      </div>
+      <div class="xp-row"><span>Progreso al siguiente nivel</span><b id="xpProgressText">0 / 100 XP</b></div>
+      <div class="progress-track"><div id="xpBar" class="progress-fill"></div></div>
+      <div class="goal-row"><span>🎯 Meta diaria</span><b id="dailyGoalText">0 / 100 XP</b></div>
+      <div class="progress-track goal"><div id="dailyGoalBar" class="progress-fill"></div></div>
     </section>
 
     <section class="stats">
@@ -34,6 +50,11 @@
     <section class="section">
       <div class="section-title"><h2>Mis cursos</h2><button id="addCourse" class="text-btn">+ Añadir</button></div>
       <div id="courses" class="course-grid"></div>
+    </section>
+
+    <section class="section">
+      <div class="section-title"><h2>🏆 Logros</h2><span id="achievementCount" class="muted">0/5</span></div>
+      <div id="achievements" class="achievement-grid"></div>
     </section>
 
     <section class="section">
